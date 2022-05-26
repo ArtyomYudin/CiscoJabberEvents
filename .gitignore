@@ -1,0 +1,6 @@
+/.DS_Store
+/.env
+/.vscode
+/bot_storage
+/cert
+/node_modules
