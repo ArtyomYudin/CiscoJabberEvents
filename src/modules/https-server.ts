@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { constants } from 'crypto';
 import { config } from 'dotenv';
-//import { zabbixBot } from './jabber-bot';
+import { zabbixBot } from './jabber-bot';
 
 config();
 
@@ -53,10 +53,10 @@ export function initHTTPSServer(): https.Server {
         });
         if (req.url === '/api/jabber' && req.method === 'POST') {
           console.log('Resive post', body);
-          //zabbixBot.say({
-          //  user: 'a.yudin@center-inform.ru',
-          //  text: body,
-          //});
+          zabbixBot.say({
+            user: 'a.yudin@center-inform.ru',
+            text: body,
+          });
           res.end();
         }
       });

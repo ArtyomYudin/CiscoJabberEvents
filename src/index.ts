@@ -4,8 +4,8 @@ import { initHTTPSServer } from './modules/https-server';
 (async () => {
   const httpServer = await initHTTPSServer();
   console.log(httpServer.address());
- // eventBot.say({
- //   user: 'a.yudin@center-inform.ru',
- //   text: 'hi!',
- // });
+  // eventBot.say({
+  //   user: 'a.yudin@center-inform.ru',
+  //   text: 'hi!',
+  // });
 })();
