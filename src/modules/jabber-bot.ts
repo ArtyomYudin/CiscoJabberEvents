@@ -1,3 +1,4 @@
+/*
 import Botkit from 'botkit-legacy';
 
 const controller = Botkit.jabberbot({
