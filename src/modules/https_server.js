@@ -2,9 +2,10 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const constants = require('crypto');
-const config = require('../config/system_config');
 const zabbixBot = require('./jabber_bot');
 const logger = require('../config/logger_config');
+
+require('dotenv').config();
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -60,8 +61,8 @@ function initHTTPSServer() {
         }
       });
     })
-    .listen(config.server.port, config.server.host, () => {
-      logger.info(`Server running at https://${config.server.host}:${config.server.port}/ ${process.pid}`);
+    .listen(parseInt(process.env.HTTPS_PORT, 10), process.env.HTTPS_HOST, () => {
+      logger.info(`Server running at https://${process.env.HTTPS_HOST}:${process.env.HTTPS_PORT}/ ${process.pid}`);
     })
     .on('error', onError);
   return server;

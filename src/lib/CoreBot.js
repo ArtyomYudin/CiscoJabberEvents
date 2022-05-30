@@ -6,7 +6,6 @@
 var mustache = require('mustache');
 var ware = require('ware');
 var clone = require('clone');
-var studio = require('./Studio.js');
 var os = require('os');
 var async = require('async');
 var PKG_VERSION = require('../../package.json').version;
@@ -327,50 +326,6 @@ function Botkit(configuration) {
        */
       var that = this;
       switch (condition.action) {
-        case 'execute_script':
-          if (condition.execute) {
-            var script = condition.execute.script;
-            var thread = condition.execute.thread;
-
-            // this will stop the conversation from automatically ending while the transition takes place
-            that.status = 'transitioning';
-
-            botkit.studio
-              .get(that.context.bot, script, that.source_message.user, that.source_message.channel, that.source_message)
-              .then(function (new_convo) {
-                that.context.transition_to = new_convo.context.script_name || null;
-                that.context.transition_to_id = new_convo.context.script_id || null;
-                that.stop('transitioning to ' + script);
-
-                // copy any question responses
-                for (var key in that.responses) {
-                  new_convo.responses[key] = that.responses[key];
-                }
-
-                // copy old variables into new conversation
-                for (var key in that.vars) {
-                  new_convo.setVar(key, that.vars[key]);
-                }
-
-                new_convo.context.transition_from = that.context.script_name || null;
-                new_convo.context.transition_from_id = that.context.script_id || null;
-
-                /*
-                 * if thread == default, this is the normal behavior and we don't need to call gotoThread
-                 * in fact, calling gotoThread will cause it to override behaviors in the scripts `before` hook.
-                 */
-                if (thread != 'default') {
-                  new_convo.gotoThread(thread);
-                }
-
-                new_convo.activate();
-              })
-              .catch(function (err) {
-                logger.error('Error executing script transition:', err);
-              });
-          }
-          break;
-
         case 'next':
           that.next();
           break;
@@ -1659,7 +1614,7 @@ function Botkit(configuration) {
   botkit.changeEars(botkit.hears_regexp);
 
   //enable Botkit Studio
-  studio(botkit);
+  // studio(botkit);
 
   return botkit;
 }

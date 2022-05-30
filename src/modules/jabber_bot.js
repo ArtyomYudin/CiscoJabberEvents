@@ -1,5 +1,8 @@
 const JabberBot = require('../lib/JabberBot');
 // import { logger } from './logger_config';
+const config = require('dotenv');
+
+require('dotenv').config();
 
 const controller = JabberBot({
   json_file_store: './bot_store/',
@@ -7,10 +10,10 @@ const controller = JabberBot({
 
 const zabbixBot = controller.spawn({
   client: {
-    jid: 'itobot@center-inform.ru',
-    password: 'ihfq,brec',
-    host: 'angela.center-inform.ru',
-    port: 5222,
+    jid: process.env.JABBER_USER,
+    password: process.env.JABBER_PASSWORD,
+    host: process.env.JABBER_URL,
+    port: process.env.JABBER_PORT,
   },
 });
 

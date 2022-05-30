@@ -44,3 +44,5 @@ testem.log
 Thumbs.db
 /cert/center_inform.crt
 /cert/center_inform.key
+
+.env

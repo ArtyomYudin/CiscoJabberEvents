@@ -1,5 +1,5 @@
 {
-  "name": "cisco-jabber-events",
+  "name": "cisco-jabber-events-server",
   "version": "0.0.1",
   "description": "",
   "main": "src/index.js",
@@ -11,9 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "async": "^3.2.3",
-    "body-parser": "^1.20.0",
-    "botkit-studio-sdk": "^1.0.9",
     "clone": "^2.1.2",
+    "dotenv": "^16.0.1",
     "jfs": "^0.3.0",
     "md5": "^2.3.0",
     "mustache": "^4.2.0",
