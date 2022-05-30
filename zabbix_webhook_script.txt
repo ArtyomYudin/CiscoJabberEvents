@@ -1,0 +1,29 @@
+try {
+    Zabbix.Log(4, '[ Cisco Jabber webhook ] Started with params: ' + value);
+    var result = {
+            'tags': {
+                'endpoint': 'Cisco Jabber'
+            }
+        },
+        params = JSON.parse(value),
+        req = new CurlHttpRequest(),
+        fields = {},
+        resp;
+
+    req.AddHeader('Content-Type: application/json');
+
+    fields.to = params.to;
+    fields.subject = params.subject;
+    fields.message = params.message;
+    fields.severity = params.severity;
+    fields.status = params.status;
+    resp = req.Post('http://172.20.4.195:3003/api/jabber',
+        JSON.stringify({"fields": fields})
+    );
+    Zabbix.Log(4, '[ Cisco Jabber webhook ] Responded with code: ' + req.Status() + '. Response: ' + resp);    
+    return resp;
+}
+catch (error) {
+    Zabbix.Log(3, '[ Cisco Jabber webhook ] Sending failed. Error: ' + error);
+    throw 'Failed with error: ' + error;
+}

@@ -1,22 +1,24 @@
 {
-  "apps": [{
-      "name"       : "CiscoJabberEvent",
-      "cwd"        : "/usr/local/node/ciscojabberevent/dist/",
-      "script"     : "./index.js",
-      "exec_mode"  : "fork", 
+  "apps": [
+    {
+      "name": "CiscoJabberEvents",
+      "cwd": "/usr/local/node/ciscojabberevents/src",
+      "script": "./index.js",
+      "exec_mode": "fork",
       "combine_logs": true,
-      "merge_logs" : true,
-      "error_file" : "/var/log/ciscoojabberevent-err.log",
-      "out_file"   : "/dev/null",
-      "pid_file"   : "/var/run/ciscojabberevent.pid",
-      "log_date_format" : "MMM DD HH:mm:ss",
+      "merge_logs": true,
+      "error_file": "/var/log/ciscoojabberevents-err.log",
+      "out_file": "/dev/null",
+      "pid_file": "/var/run/ciscojabberevents.pid",
+      "log_date_format": "MMM DD HH:mm:ss",
       "env": {
         "watch": false,
         "NODE_ENV": "development"
-    } ,
-      "env_production" : {
+      },
+      "env_production": {
         "NODE_ENV": "production",
-        "watch"      : false
+        "watch": false
+      }
     }
-  }]
+  ]
 }

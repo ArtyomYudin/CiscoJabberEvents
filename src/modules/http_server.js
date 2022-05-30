@@ -1,7 +1,4 @@
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
-const constants = require('crypto');
+const http = require('http');
 const zabbixBot = require('./jabber_bot');
 const logger = require('../config/logger_config');
 
@@ -14,15 +11,8 @@ const headers = {
   'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
   // 'Access-Control-Max-Age': 2592000, // 30 days
 };
-const options = {
-  key: fs.readFileSync(path.resolve(__dirname, './../../cert/center_inform.key')),
-  cert: fs.readFileSync(path.resolve(__dirname, './../../cert/center_inform.crt')),
-  requestCert: false,
-  // secureProtocol: 'SSLv23_method',
-  secureOptions: constants.SSL_OP_NO_SSLv3 || constants.SSL_OP_NO_SSLv2,
-};
 
-function initHTTPSServer() {
+function initHTTPServer() {
   function onError(error) {
     if (error.syscall !== 'listen') {
       // throw error;
@@ -30,8 +20,8 @@ function initHTTPSServer() {
     }
   }
 
-  const server = https
-    .createServer(options, (req, res) => {
+  const server = http
+    .createServer((req, res) => {
       if (req.method === 'OPTIONS') {
         res.statusCode = 204;
         Object.entries(headers).forEach(([key, value]) => {
@@ -61,10 +51,10 @@ function initHTTPSServer() {
         }
       });
     })
-    .listen(parseInt(process.env.HTTPS_PORT, 10), process.env.HTTPS_HOST, () => {
-      logger.info(`Server running at https://${process.env.HTTPS_HOST}:${process.env.HTTPS_PORT}/ ${process.pid}`);
+    .listen(parseInt(process.env.HTTP_PORT, 10), process.env.HTTP_HOST, () => {
+      logger.info(`Server running at http://${process.env.HTTP_HOST}:${process.env.HTTP_PORT}/ ${process.pid}`);
     })
     .on('error', onError);
   return server;
 }
-module.exports = initHTTPSServer;
+module.exports = initHTTPServer;
