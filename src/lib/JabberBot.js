@@ -1,6 +1,7 @@
 var Botkit = require(__dirname + '/CoreBot.js');
 const Stanza = require('node-xmpp-client').Stanza;
 const GroupManager = require('./JabberGroupManager.js');
+const logger = require('../config/logger_config');
 
 function JabberBot(configuration) {
   // Create a core botkit bot
@@ -59,8 +60,8 @@ function JabberBot(configuration) {
     }
 
     xmpp.on('online', function (data) {
-      console.log(toUTCDateTimeString(new Date()) + ':Connected with JID: ' + data.jid.user);
-      console.log("Yes, I'm connected!");
+      logger.info(toUTCDateTimeString(new Date()) + ':Connected with JID: ' + data.jid.user);
+      logger.info("Yes, I'm connected!");
       request_roster();
 
       /*
@@ -78,18 +79,18 @@ function JabberBot(configuration) {
     });
 
     xmpp.on('error', function (err) {
-      console.log(toUTCDateTimeString(new Date()) + ':' + err);
+      logger.info(toUTCDateTimeString(new Date()) + ':' + err);
       process.exit();
     });
 
     xmpp.on('subscribe', function (from) {
       xmpp.acceptSubscription(from);
-      console.log(toUTCDateTimeString(new Date()) + ':accept subscribe from:' + from);
+      logger.info(toUTCDateTimeString(new Date()) + ':accept subscribe from:' + from);
       controller.trigger('subscribe', [bot, from]);
     });
 
     xmpp.on('unsubscribe', function (from) {
-      console.log(toUTCDateTimeString(new Date()) + ':accept unsubscribe from:' + from);
+      logger.info(toUTCDateTimeString(new Date()) + ':accept unsubscribe from:' + from);
       xmpp.acceptUnsubscription(from);
     });
 
@@ -225,7 +226,7 @@ function JabberBot(configuration) {
     };
 
     bot.findConversation = function (message, cb) {
-      botkit.debug('CUSTOM FIND CONVO', message.user, message.channel);
+      logger.debug('CUSTOM FIND CONVO', message.user, message.channel);
       for (var t = 0; t < botkit.tasks.length; t++) {
         for (var c = 0; c < botkit.tasks[t].convos.length; c++) {
           if (
@@ -233,7 +234,7 @@ function JabberBot(configuration) {
             botkit.tasks[t].convos[c].source_message.user == message.user &&
             botkit.tasks[t].convos[c].source_message.channel == message.channel
           ) {
-            botkit.debug('FOUND EXISTING CONVO!');
+            logger.debug('FOUND EXISTING CONVO!');
             cb(botkit.tasks[t].convos[c]);
             return;
           }

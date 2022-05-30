@@ -1,4 +1,4 @@
-import { initHTTPSServer } from './modules/https-server';
+const initHTTPSServer = require('./modules/https_server');
 //import { eventBot } from './modules/jabber-bot';
 
 (async () => {

@@ -1,11 +1,10 @@
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
-import { constants } from 'crypto';
-import { config } from 'dotenv';
-import { zabbixBot } from './jabber-bot';
-
-config();
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+const constants = require('crypto');
+const config = require('../config/system_config');
+const zabbixBot = require('./jabber_bot');
+const logger = require('../config/logger_config');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -22,11 +21,11 @@ const options = {
   secureOptions: constants.SSL_OP_NO_SSLv3 || constants.SSL_OP_NO_SSLv2,
 };
 
-export function initHTTPSServer(): https.Server {
-  function onError(error: any) {
+function initHTTPSServer() {
+  function onError(error) {
     if (error.syscall !== 'listen') {
       // throw error;
-      console.log("Well, this didn't work...");
+      logger.error("Well, this didn't work...");
     }
   }
 
@@ -40,19 +39,19 @@ export function initHTTPSServer(): https.Server {
         res.end();
       }
 
-      let body: any = [];
+      let body = [];
 
       req.on('error', err => {
-        console.log('REQ error:', err);
+        logger.error('REQ error:', err);
       });
       req.on('data', chunk => body.push(chunk));
       req.on('end', () => {
         body = Buffer.concat(body).toString();
         res.on('error', err => {
-          console.log('RES error:', err);
+          logger.error('RES error:', err);
         });
         if (req.url === '/api/jabber' && req.method === 'POST') {
-          console.log('Resive post', body);
+          logger.info('Resive post', body);
           zabbixBot.say({
             user: 'a.yudin@center-inform.ru',
             text: body,
@@ -61,9 +60,10 @@ export function initHTTPSServer(): https.Server {
         }
       });
     })
-    .listen(parseInt(process.env.HTTPS_PORT as string, 10), process.env.HTTPS_HOST as string, () => {
-      console.log(`Server is listening on ${process.env.HTTPS_HOST}:${process.env.HTTPS_PORT}`);
+    .listen(config.server.port, config.server.host, () => {
+      logger.info(`Server running at https://${config.server.host}:${config.server.port}/ ${process.pid}`);
     })
     .on('error', onError);
   return server;
 }
+module.exports = initHTTPSServer;

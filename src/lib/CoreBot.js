@@ -4,16 +4,14 @@
  *
  */
 var mustache = require('mustache');
-var ConsoleLogger = require(__dirname + '/console_logger.js');
-var LogLevels = ConsoleLogger.LogLevels;
 var ware = require('ware');
 var clone = require('clone');
 var studio = require('./Studio.js');
 var os = require('os');
 var async = require('async');
 var PKG_VERSION = require('../../package.json').version;
-// var express = require('express');
-var bodyParser = require('body-parser');
+const logger = require('../config/logger_config');
+
 function Botkit(configuration) {
   var botkit = {
     events: {}, // this will hold event handlers
@@ -82,7 +80,7 @@ function Botkit(configuration) {
 
     botkit.middleware.ingest.run(obot, opayload, source, function (err, bot, payload) {
       if (err) {
-        console.error('An error occurred in the ingest middleware: ', err);
+        logger.error('An error occurred in the ingest middleware: ', err);
         botkit.trigger('ingest_error', [err, obot, opayload]);
         botkit.trigger('pipeline_error', [err, obot, opayload, 'ingest']);
         return;
@@ -95,7 +93,7 @@ function Botkit(configuration) {
     opayload._pipeline.stage = 'normalize';
     botkit.middleware.normalize.run(obot, opayload, function (err, bot, message) {
       if (err) {
-        console.error('An error occurred in the normalize middleware: ', err);
+        logger.error('An error occurred in the normalize middleware: ', err);
         botkit.trigger('normalize_error', [err, obot, opayload]);
         botkit.trigger('pipeline_error', [err, obot, opayload, 'normalize']);
         return;
@@ -112,7 +110,7 @@ function Botkit(configuration) {
     omessage._pipeline.stage = 'categorize';
     botkit.middleware.categorize.run(obot, omessage, function (err, bot, message) {
       if (err) {
-        console.error('An error occurred in the categorize middleware: ', err);
+        logger.error('An error occurred in the categorize middleware: ', err);
         botkit.trigger('categorize_error', [err, obot, omessage]);
         botkit.trigger('pipeline_error', [err, obot, omessage, 'categorize']);
         return;
@@ -127,7 +125,7 @@ function Botkit(configuration) {
     botkit.middleware.receive.run(obot, omessage, function (err, bot, message) {
       if (err) {
         // log the error to console, so people recognize it
-        console.error('An error occurred in the receive middleware: ', err);
+        logger.error('An error occurred in the receive middleware: ', err);
         /*
          * an error occured in the receive middleware
          * fire the error event instead of disposing the message
@@ -136,7 +134,7 @@ function Botkit(configuration) {
         botkit.trigger('receive_error', [err, obot, omessage]);
         botkit.trigger('pipeline_error', [err, obot, omessage, 'receive']);
       } else {
-        botkit.debug('RECEIVED MESSAGE');
+        logger.debug('RECEIVED MESSAGE');
         bot.findConversation(message, function (convo) {
           if (convo) {
             convo.handle(message);
@@ -231,7 +229,7 @@ function Botkit(configuration) {
       var that = this;
       this.lastActive = new Date();
       this.transcript.push(message);
-      botkit.debug('HANDLING MESSAGE IN CONVO', message);
+      logger.debug('HANDLING MESSAGE IN CONVO', message);
       // do other stuff like call custom callbacks
       if (this.handler) {
         this.capture(message, function (message) {
@@ -368,7 +366,7 @@ function Botkit(configuration) {
                 new_convo.activate();
               })
               .catch(function (err) {
-                console.error('Error executing script transition:', err);
+                logger.error('Error executing script transition:', err);
               });
           }
           break;
@@ -454,7 +452,7 @@ function Botkit(configuration) {
     };
 
     this.on = function (event, cb) {
-      botkit.debug('Setting up a handler for', event);
+      logger.debug('Setting up a handler for', event);
       var events = event.split(/\,/g);
       // Trim any whitespace out of the event name.
       events = events.map(function (event) {
@@ -614,7 +612,7 @@ function Botkit(configuration) {
           if (that.next_thread == 'default') {
             that.threads[that.next_thread] = [];
           } else {
-            botkit.debug('WARN: gotoThread() to an invalid thread!', thread);
+            logger.debug('WARN: gotoThread() to an invalid thread!', thread);
             that.stop('unknown_thread');
             return;
           }
@@ -758,7 +756,7 @@ function Botkit(configuration) {
       try {
         rendered = mustache.render(text, vars);
       } catch (err) {
-        botkit.log('Error in message template. Mustache failed with error: ', err);
+        logger.error('Error in message template. Mustache failed with error: ', err);
         rendered = text;
       }
 
@@ -769,7 +767,7 @@ function Botkit(configuration) {
       this.handler = null;
       this.messages = [];
       this.status = status || 'stopped';
-      botkit.debug('Conversation is over with status ' + this.status);
+      logger.debug('Conversation is over with status ' + this.status);
       this.task.conversationEnded(this);
     };
 
@@ -832,7 +830,7 @@ function Botkit(configuration) {
       if (typeof handler == 'function') {
         this.timeOutHandler = handler;
       } else {
-        botkit.debug('Invalid timeout function passed to onTimeout');
+        logger.debug('Invalid timeout function passed to onTimeout');
       }
     };
 
@@ -938,7 +936,7 @@ function Botkit(configuration) {
 
                   this.task.bot.reply(this.source_message, outbound, function (err, sent_message) {
                     if (err) {
-                      botkit.log('An error occurred while sending a message: ', err);
+                      logger.error('An error occurred while sending a message: ', err);
 
                       /*
                        * even though an error occurred, set sent to true
@@ -986,7 +984,7 @@ function Botkit(configuration) {
       }
     };
 
-    botkit.debug('CREATED A CONVO FOR', this.source_message.user, this.source_message.channel);
+    logger.debug('CREATED A CONVO FOR', this.source_message.user, this.source_message.channel);
     this.gotoThread('default');
   }
 
@@ -1016,7 +1014,7 @@ function Botkit(configuration) {
 
     this.startConversation = function (message) {
       var convo = this.createConversation(message);
-      botkit.debug('>   [Start] ', convo.id, ' Conversation with ', message.user, 'in', message.channel);
+      logger.debug('>   [Start] ', convo.id, ' Conversation with ', message.user, 'in', message.channel);
 
       convo.activate();
       return convo;
@@ -1025,7 +1023,7 @@ function Botkit(configuration) {
     this.conversationEnded = function (convo) {
       var that = this;
       botkit.middleware.conversationEnd.run(this.bot, convo, function (err, bot, convo) {
-        botkit.debug('>   [End] ', convo.id, ' Conversation with ', convo.source_message.user, 'in', convo.source_message.channel);
+        logger.debug('>   [End] ', convo.id, ' Conversation with ', convo.source_message.user, 'in', convo.source_message.channel);
         that.trigger('conversationEnded', [convo]);
         that.botkit.trigger('conversationEnded', [bot, convo]);
         convo.trigger('end', [convo]);
@@ -1050,14 +1048,14 @@ function Botkit(configuration) {
     };
 
     this.taskEnded = function () {
-      botkit.debug('[End] ', this.id, ' Task for ', this.source_message.user, 'in', this.source_message.channel);
+      logger.debug('[End] ', this.id, ' Task for ', this.source_message.user, 'in', this.source_message.channel);
 
       this.status = 'completed';
       this.trigger('end', [this]);
     };
 
     this.on = function (event, cb) {
-      botkit.debug('Setting up a handler for', event);
+      logger.debug('Setting up a handler for', event);
       var events = event.split(/\,/g);
 
       // Trim any whitespace out of the event name.
@@ -1218,7 +1216,7 @@ function Botkit(configuration) {
           try {
             test = new RegExp(tests[t], 'i');
           } catch (err) {
-            botkit.log('Error in regular expression: ' + tests[t] + ': ' + err);
+            logger.error('Error in regular expression: ' + tests[t] + ': ' + err);
             return false;
           }
           if (!test) {
@@ -1279,7 +1277,7 @@ function Botkit(configuration) {
           events[e],
           function (bot, message) {
             if (test_function && test_function(keywords, message)) {
-              botkit.debug('I HEARD', keywords);
+              logger.debug('I HEARD', keywords);
               botkit.middleware.heard.run(bot, message, function (err, bot, message) {
                 cb.apply(this, [bot, message]);
                 botkit.trigger('heard_trigger', [bot, keywords, message]);
@@ -1296,7 +1294,7 @@ function Botkit(configuration) {
   };
 
   botkit.on = function (event, cb, is_hearing) {
-    botkit.debug('Setting up a handler for', event);
+    logger.debug('Setting up a handler for', event);
     var events = typeof event == 'string' ? event.split(/\,/g) : event;
 
     // Trim any whitespace out of the event name.
@@ -1387,14 +1385,14 @@ function Botkit(configuration) {
       var platform_message = {};
       botkit.middleware.send.run(worker, message, function (err, worker, message) {
         if (err) {
-          botkit.log('An error occurred in the send middleware:: ' + err);
+          logger.error('An error occurred in the send middleware:: ' + err);
           if (cb) {
             cb(err);
           }
         } else {
           botkit.middleware.format.run(worker, message, platform_message, function (err, worker, message, platform_message) {
             if (err) {
-              botkit.log('An error occurred in the format middleware: ' + err);
+              logger.error('An error occurred in the format middleware: ' + err);
               if (cb) {
                 cb(err);
               }
@@ -1417,7 +1415,7 @@ function Botkit(configuration) {
 
     botkit.middleware.spawn.run(worker, function (err, worker) {
       if (err) {
-        botkit.log('Error in middleware.spawn.run: ' + err);
+        logger.error('Error in middleware.spawn.run: ' + err);
       } else {
         botkit.trigger('spawned', [worker]);
 
@@ -1457,7 +1455,7 @@ function Botkit(configuration) {
     var task = new Task(bot, message, this);
 
     task.id = botkit.taskCount++;
-    botkit.debug('[Start] ', task.id, ' Task for ', message.user, 'in', message.channel);
+    logger.debug('[Start] ', task.id, ' Task for ', message.user, 'in', message.channel);
 
     var convo = task.startConversation(message);
 
@@ -1536,7 +1534,7 @@ function Botkit(configuration) {
     this.config = config;
 
     this.say = function (message, cb) {
-      botkit.debug('SAY:', message);
+      logger.debug('SAY:', message);
       if (cb) {
         cb();
       }
@@ -1549,11 +1547,11 @@ function Botkit(configuration) {
     };
 
     this.reply = function (src, resp) {
-      botkit.debug('REPLY:', resp);
+      logger.debug('REPLY:', resp);
     };
 
     this.findConversation = function (message, cb) {
-      botkit.debug('DEFAULT FIND CONVO');
+      logger.debug('DEFAULT FIND CONVO');
       cb(null);
     };
   };
@@ -1595,6 +1593,7 @@ function Botkit(configuration) {
     botkit.config.hostname = '0.0.0.0';
   }
 
+  /*
   if (!configuration.logLevel) {
     if (configuration.debug) {
       configuration.logLevel = 'debug';
@@ -1622,10 +1621,11 @@ function Botkit(configuration) {
     botkit.log[level] = botkit.logger.log.bind(botkit.logger, level);
   });
   botkit.debug = botkit.log.debug;
+  */
 
   if (!botkit.config.disable_startup_messages) {
     // eslint-disable-next-line no-console
-    console.log('Initializing Botkit v' + botkit.version());
+    logger.info('Initializing Botkit v' + botkit.version());
   }
 
   if (configuration.storage) {
@@ -1640,19 +1640,19 @@ function Botkit(configuration) {
       configuration.storage.channels.get &&
       configuration.storage.channels.save
     ) {
-      botkit.log('** Using custom storage system.');
+      logger.info('** Using custom storage system.');
       botkit.storage = configuration.storage;
     } else {
       throw new Error('Storage object does not have all required methods!');
     }
   } else if (configuration.json_file_store) {
-    botkit.log('** Using simple storage. Saving data to ' + configuration.json_file_store);
+    logger.info('** Using simple storage. Saving data to ' + configuration.json_file_store);
     var simple_storage = require(__dirname + '/storage/simple_storage.js');
     botkit.storage = simple_storage({
       path: configuration.json_file_store,
     });
   } else {
-    botkit.log('** No persistent storage method specified! Data may be lost when process shuts down.');
+    logger.info('** No persistent storage method specified! Data may be lost when process shuts down.');
   }
 
   // set the default set of ears to use the regular expression matching
