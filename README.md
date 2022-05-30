@@ -4,5 +4,3 @@
 Удалено все что не касается Cisco Jabber.
 
 HTTP сервер слушает запросы на /api/jabber, в частночти от Zabbix (webhook)
-
-# Cisco Jabber Bot
