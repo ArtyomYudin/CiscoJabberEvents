@@ -13,11 +13,23 @@
       "log_date_format": "MMM DD HH:mm:ss",
       "env": {
         "watch": false,
-        "NODE_ENV": "development"
+        "NODE_ENV": "development",
+        "HTTP_PORT": "3003",
+        "HTTP_HOST": "172.20.4.195",
+        "JABBER_USER": "itobot@center-inform.ru",
+        "JABBER_PASSWORD": "ihfq,brec",
+        "JABBER_URL": "angela.center-inform.ru",
+        "Jabber_PORT": "5222"
       },
       "env_production": {
         "NODE_ENV": "production",
-        "watch": false
+        "watch": false,
+        "HTTP_PORT": "3003",
+        "HTTP_HOST": "172.20.4.195",
+        "JABBER_USER": "itobot@center-inform.ru",
+        "JABBER_PASSWORD": "ihfq,brec",
+        "JABBER_URL": "angela.center-inform.ru",
+        "Jabber_PORT": "5222"
       }
     }
   ]

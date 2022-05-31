@@ -46,3 +46,4 @@ Thumbs.db
 /cert/center_inform.key
 
 .env
+process.json

@@ -43,9 +43,13 @@ function initHTTPServer() {
         });
         if (req.url === '/api/jabber' && req.method === 'POST') {
           logger.info('Resive post', body);
+          const bodyJSON = JSON.parse(body).fields;
+          let alarmMessage = `${bodyJSON.subject}\n`;
+          alarmMessage += `${bodyJSON.message}\n`;
+          alarmMessage += `${bodyJSON.value}\n`;
           zabbixBot.say({
-            user: 'a.yudin@center-inform.ru',
-            text: body,
+            user: bodyJSON.to,
+            text: alarmMessage,
           });
           res.end();
         }
