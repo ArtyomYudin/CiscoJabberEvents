@@ -1,6 +1,7 @@
 const JabberBot = require('../lib/JabberBot');
 // import { logger } from './logger_config';
 const config = require('dotenv');
+const logger = require('../config/logger_config');
 
 require('dotenv').config();
 
@@ -8,7 +9,7 @@ const controller = JabberBot({
   json_file_store: './bot_store/',
 });
 
-const zabbixBot = controller.spawn({
+const bot = controller.spawn({
   client: {
     jid: process.env.JABBER_USER,
     password: process.env.JABBER_PASSWORD,
@@ -17,12 +18,28 @@ const zabbixBot = controller.spawn({
   },
 });
 
-/*
-bot.say({
-  user: 'a.yudin@center-inform.ru',
-  text: 'hi!',
-});
-*/
+function zabbixAlarm(trigger) {
+  let alarmValue = '';
+  let alarmMessage = 'Информация от Zabbix.\n';
+  alarmMessage += `Хост: ${trigger.subject}\n`;
+  alarmMessage += `Статус: ${trigger.status}\n`;
+  alarmMessage += `Сообщение: ${trigger.message}\n`;
+  /* if (trigger.value1) {
+    alarmValue = `${trigger.value1}`;
+  }
+  if (trigger.value2) {
+    alarmValue = `${trigger.value1} ${trigger.value2} `;
+  }
+  if (trigger.value3) {
+    alarmValue = `${trigger.value1} ${trigger.value2} ${trigger.value3}`;
+  }*/
+  alarmMessage += `Текущее значение: ${trigger.lastvalue}`;
+  bot.say({
+    user: trigger.to,
+    text: alarmMessage,
+  });
+}
+
 controller.hears(['hello'], ['direct_mention', 'direct_message'], function (bot, message) {
   bot.reply(message, 'Hi');
 });
@@ -35,4 +52,5 @@ controller.on('direct_message', function (bot, message) {
   bot.reply(message, 'I got your direct message. You said, "' + message.text + '"');
 });
 
-module.exports = zabbixBot;
+//exports.jabberBot = bot;
+exports.zabbixAlarm = zabbixAlarm;

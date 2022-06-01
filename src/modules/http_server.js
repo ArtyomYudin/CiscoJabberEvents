@@ -1,5 +1,5 @@
 const http = require('http');
-const zabbixBot = require('./jabber_bot');
+const bot = require('./jabber_bot');
 const logger = require('../config/logger_config');
 
 require('dotenv').config();
@@ -42,15 +42,7 @@ function initHTTPServer() {
           logger.error('RES error:', err);
         });
         if (req.url === '/api/jabber' && req.method === 'POST') {
-          logger.info('Resive post', body);
-          const bodyJSON = JSON.parse(body).fields;
-          let alarmMessage = `${bodyJSON.subject}\n`;
-          alarmMessage += `${bodyJSON.message}\n`;
-          alarmMessage += `${bodyJSON.value}\n`;
-          zabbixBot.say({
-            user: bodyJSON.to,
-            text: alarmMessage,
-          });
+          bot.zabbixAlarm(JSON.parse(body).fields);
           res.end();
         }
       });
