@@ -1,6 +1,7 @@
 const JabberBot = require('../lib/JabberBot');
 // import { logger } from './logger_config';
-const config = require('dotenv');
+//const config = require('dotenv');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const logger = require('../config/logger_config');
 
 require('dotenv').config();
@@ -33,15 +34,36 @@ function zabbixAlarm(trigger) {
   if (trigger.value3) {
     alarmValue = `${trigger.value1} ${trigger.value2} ${trigger.value3}`;
   }*/
-  alarmMessage += `Текущее значение: ${trigger.lastvalue}`;
+  alarmMessage += `Оперативные данные: ${trigger.opdata}`;
   bot.say({
     user: trigger.to,
     text: alarmMessage,
   });
 }
 
+async function skudGetUserLocation() {
+  const postData = { empName: 'Орлов' };
+
+  const dataResponse = await fetch('https://it.center-inform.ru:3000/api/employee', {
+    method: 'post',
+    body: JSON.stringify(postData),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const dataJSON = await dataResponse.json();
+  return dataJSON;
+}
+
 controller.hears(['hello'], ['direct_mention', 'direct_message'], function (bot, message) {
   bot.reply(message, 'Hi');
+});
+
+controller.hears(['скуд:'], ['direct_mention', 'direct_message'], async function (bot, message) {
+  bot.reply(message, 'Ждите...');
+  skudRes = await skudGetUserLocation();
+  let skudMessage = 'Информация от СКУД.\n';
+  skudMessage += `${skudRes.lastName} ${skudRes.apointName} ${skudRes.timeStamp}`;
+
+  bot.reply(message, skudMessage);
 });
 
 controller.on('direct_mention', function (bot, message) {
