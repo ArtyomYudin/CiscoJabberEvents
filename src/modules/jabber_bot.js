@@ -41,8 +41,8 @@ function zabbixAlarm(trigger) {
   });
 }
 
-async function skudGetUserLocation() {
-  const postData = { empName: 'Орлов' };
+async function skudGetUserLocation(search) {
+  const postData = { empName: search };
 
   const dataResponse = await fetch('https://it.center-inform.ru:3000/api/employee', {
     method: 'post',
@@ -57,15 +57,19 @@ controller.hears(['hello'], ['direct_mention', 'direct_message'], function (bot,
   bot.reply(message, 'Hi');
 });
 
-controller.hears(['скуд:'], ['direct_mention', 'direct_message'], async function (bot, message) {
-  bot.reply(message, 'Ждите...');
-  skudRes = await skudGetUserLocation();
-  let skudMessage = 'Информация от СКУД.\n';
-  skudMessage += `${skudRes.lastName} ${skudRes.apointName} ${skudRes.timeStamp}`;
+controller.hears(['!скуд'], ['direct_mention', 'direct_message'], async function (bot, message) {
+  let skudMessage = '';
+  if (message.text.indexOf('!скуд ') === 0 && message.text.substring(6)) {
+    let search = message.text.substring(6);
+    bot.reply(message, 'Ждите...');
+    skudRes = await skudGetUserLocation(search);
+    skudMessage = 'Информация от СКУД.\n';
+    skudMessage += `${skudRes.lastName} ${skudRes.apointName} ${skudRes.timeStamp}`;
+  } else skudMessage = `Не правильный запрос.`;
 
   bot.reply(message, skudMessage);
 });
-
+/*
 controller.on('direct_mention', function (bot, message) {
   bot.reply(message, 'You mentioned me in a group and said, "' + message.text + '"');
 });
@@ -73,6 +77,6 @@ controller.on('direct_mention', function (bot, message) {
 controller.on('direct_message', function (bot, message) {
   bot.reply(message, 'I got your direct message. You said, "' + message.text + '"');
 });
-
+*/
 //exports.jabberBot = bot;
 exports.zabbixAlarm = zabbixAlarm;
